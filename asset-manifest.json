@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/ph-house-age/static/css/main.38affbd0.css",
-    "main.js": "/ph-house-age/static/js/main.1a54772b.js",
+    "main.js": "/ph-house-age/static/js/main.829aec9f.js",
     "static/js/453.eacd2753.chunk.js": "/ph-house-age/static/js/453.eacd2753.chunk.js",
     "static/media/BySex-Artboard_3.png": "/ph-house-age/static/media/BySex-Artboard_3.09a0579313260fb98376.png",
     "static/media/BySex-Artboard_2.png": "/ph-house-age/static/media/BySex-Artboard_2.0187f162e30528a87821.png",
@@ -9,11 +9,11 @@
     "static/media/total_age.svg": "/ph-house-age/static/media/total_age.049d1010e5b03b54b04b3207adeb7fa6.svg",
     "index.html": "/ph-house-age/index.html",
     "main.38affbd0.css.map": "/ph-house-age/static/css/main.38affbd0.css.map",
-    "main.1a54772b.js.map": "/ph-house-age/static/js/main.1a54772b.js.map",
+    "main.829aec9f.js.map": "/ph-house-age/static/js/main.829aec9f.js.map",
     "453.eacd2753.chunk.js.map": "/ph-house-age/static/js/453.eacd2753.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.38affbd0.css",
-    "static/js/main.1a54772b.js"
+    "static/js/main.829aec9f.js"
   ]
 }
