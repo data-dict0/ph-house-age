@@ -111,7 +111,7 @@ const HorizontalScroll = () => {
         };
     }, [isAtEnd, hasCompletedOnce]);
 
-    // Mobile touch support
+    // Mobile touch support - Modified to convert vertical swipes to horizontal scrolling
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
@@ -119,13 +119,18 @@ const HorizontalScroll = () => {
         let touchStartX = 0;
         let touchStartY = 0;
         let initialScrollLeft = 0;
-        let isTouchHorizontal = false;
+        
+        // Detect if the device is mobile
+        const isMobileDevice = () => {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        };
+        
+        const isMobile = isMobileDevice();
 
         const handleTouchStart = (e) => {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
             initialScrollLeft = container.scrollLeft;
-            isTouchHorizontal = false;
         };
 
         const handleTouchMove = (e) => {
@@ -136,13 +141,24 @@ const HorizontalScroll = () => {
             const deltaX = touchStartX - touchX;
             const deltaY = touchStartY - touchY;
             
-            // Determine scroll direction if not already set
-            if (!isTouchHorizontal && Math.abs(deltaX) > Math.abs(deltaY) && !isAtEnd) {
-                isTouchHorizontal = true;
+            // On mobile: if not at end of horizontal scroll, convert vertical swipes to horizontal scrolling
+            if (isMobile && !isAtEnd) {
+                e.preventDefault();
+                
+                // Use the larger of deltaX or deltaY for horizontal scrolling
+                // Vertical swipes (deltaY) will now move the content horizontally
+                const scrollDelta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
+                
+                const newScrollLeft = initialScrollLeft + scrollDelta;
+                container.scrollLeft = Math.max(0, Math.min(newScrollLeft, container.scrollWidth - container.clientWidth));
+                updateReveal(container.scrollLeft);
+                
+                setIsScrolling(true);
+                clearTimeout(window.scrollTimer);
+                window.scrollTimer = setTimeout(() => setIsScrolling(false), 150);
             }
-            
-            // Handle horizontal scrolling
-            if (isTouchHorizontal && !isAtEnd) {
+            // Desktop or at end of scroll: handle horizontal scrolling normally
+            else if (!isAtEnd && Math.abs(deltaX) > Math.abs(deltaY)) {
                 e.preventDefault();
                 const newScrollLeft = initialScrollLeft + deltaX;
                 container.scrollLeft = Math.max(0, Math.min(newScrollLeft, container.scrollWidth - container.clientWidth));
@@ -182,7 +198,7 @@ const HorizontalScroll = () => {
                 transition: 'opacity 0.5s ease',
                 pointerEvents: 'none',
             }}>
-                {isAtEnd ? 'Continue scrolling down' : 'Scroll horizontally →'}
+                {isAtEnd ? 'Continue scrolling down' : 'Scroll to explore →'}
             </div>
             
             <div 
@@ -251,23 +267,6 @@ const HorizontalScroll = () => {
                         />
                     </div>
                 </div>
-            </div>
-            
-            {/* Visual indicator for transition to vertical scrolling */}
-            <div style={{
-                position: 'absolute',
-                bottom: '20px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                color: 'white',
-                background: 'rgba(0,0,0,0.7)',
-                padding: '8px 16px',
-                borderRadius: '20px',
-                opacity: isAtEnd ? 0 : 0,
-                transition: 'opacity 0.3s ease',
-                pointerEvents: 'none',
-            }}>
-                
             </div>
         </div>
     );
