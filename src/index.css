@@ -18,8 +18,14 @@ text-align: center;
 
 .dek {
   font-weight: lighter;
-  margin: 3px;
   text-align: center;
+  font-size: 18px;
+  display: block;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .byline {

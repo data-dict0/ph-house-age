@@ -183,23 +183,7 @@ const HorizontalScroll = () => {
             overflow: 'hidden',
             position: 'relative'
         }}>
-            {/* Instruction overlay that fades out */}
-            <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                background: 'rgba(0,0,0,0.7)',
-                color: 'white',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                zIndex: 10,
-                opacity: isScrolling || isAtEnd ? 0 : 0.8,
-                transition: 'opacity 0.5s ease',
-                pointerEvents: 'none',
-            }}>
-                {isAtEnd ? 'Continue scrolling down' : 'Scroll to explore →'}
-            </div>
+            {/* Instruction overlay removed */}
             
             <div 
                 ref={containerRef}
