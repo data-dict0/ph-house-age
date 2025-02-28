@@ -44,8 +44,8 @@ function App() {
         maxWidth: '800px',
       }}>
         <div className='ChartText'>
-          <h3>Mindanao House candidates are slightly younger than rest of the country</h3>
-          <p>Median age of candidates for district representatives in 2025 elections</p>
+          <h3>Philippine House lawmakers are younger than counterparts in the region</h3>
+          <p>Average age of lawmakers at the lower house of congress or a unicameral parliament</p>
         </div>
 
       </section>
@@ -92,12 +92,13 @@ function App() {
       }}>
 
         <div className='ChartText'>
-          <h3>More male than female candidates for the House of Representatives</h3>
-          <p>Age distribution, by sex</p>
+          <h3>Mindanao House candidates are slightly younger than rest of the country</h3>
+          <p>Median age of candidates for district representatives in 2025 elections</p>
         </div>
 
       </section>
-      <BySex />
+      <ByIsland
+      />
 
       <section style={{
         position: 'relative',
