@@ -28,6 +28,11 @@ text-align: center;
   hyphens: auto;
 }
 
+a {
+  text-decoration-color: #212529;
+  color: #212529;
+}
+
 .byline {
   text-align: center;
 }

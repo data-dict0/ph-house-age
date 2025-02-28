@@ -8,7 +8,7 @@ import ByIsland from './components/ByIsland';
 function App() {
   return (
     <div>
-      <Headline title="Does age really matter?" dek="Over half of the candidates for Philippines' House of Representatives are over 55 years old, the median age. Analysts say it's a reflection of the grip political dynasties in politics." />
+      <Headline title="Does age matter in Philippine elections?" dek="Over half of the candidates for Philippines' House of Representatives are over 55 years old, the median age. Analysts say it's a reflection of the grip political dynasties in politics." />
 
       <section style={{ height: '100vh' }}>
         <HorizontalScroll />
@@ -32,15 +32,7 @@ function App() {
         </div>
 
         <div className='BodyText'>
-          <p>Topline data show that the median age of candidates for district representatives this year is at 55 years old, higher than the current median age of 51 for the current members of the House.</p>
-        </div>
-
-        <div className='BodyText'>
-          <p>That said, the data begins to be subject to other influences the moment you drill deeper into it. For instance, in Mindanao, the median age of 51.7 years old is a little lower than the rest of archipelago. A closer look will show, however, that while there are younger House candidates in the island, many of them are running unopposed in their districts, helping pull down the median age.</p>
-        </div>
-
-        <div className='BodyText'>
-          <p>In cases when the field is more competitive, the question becomes who the competition is. Large cities such as Cebu and Davao, which stand as their own legislative districts, tend to have more candidates for district representatives. But many come from the same political families that used to govern the area.</p>
+          <p>The median age of candidates for district representatives this year is at 55 years old, higher than the current median age of 51 for the current members of the House, our analysis showed. These numbers are generally comparable to most countries in the region, including Indonesia (51.6 years) and Thailand (50.9 years), according to Geneva-based Inter-Parliamentary Union that tracks parliaments and congresses.</p>
         </div>
 
       </section>
@@ -70,23 +62,23 @@ function App() {
       }}>
 
         <div className='BodyText'>
-          <p>This is a situation when having younger candidates for public office may "probably not be a good thing," Yusingco said. For instance, Augusto Javier Campos III, 32, of the Garcia clan and Omar Vincent Duterte, 30, grandson of former president Rodrigo Duterte, are both running for the second district of Davao City. The Philippine Center for Investigative Journalism has found that <a href="https://pcij.org/2025/01/26/113-out-of-149-philippine-cities-also-ruled-by-political-dynasties/" target='_blank'>113 of 149 Philippine cities</a> are ruled by a political dynasty.</p>
+          <p>Broken down however, some discrepancies across locations can be seen. For instance, Mindanao tends to have slightly younger candidates for representatives than most of the archipelago, at 51.7 years old. However, part of why this is the case, is many candidates running unopposed, helping pull down the median age.</p>
         </div>
 
         <div className='BodyText'>
-          <p>"Dynastic youth candidates running for office just cements the domination of political dynasties over politics and governance," Yusingco said.</p>
+          <p>At the very basic level, areas with more congressional districts tend to have a larger pool of candidates coming from various ages. Bulacan, where there are six districts, have candidates aged between 25 and 83. Cavite, with eight districts, have candidates aged 26 to 74.</p>
         </div>
 
         <div className='BodyText'>
-          <p>The Constitution prohibits political dynasties, but the Supreme Court, in cases lodged before it to implement the charter provision, had consistently ruled that an enabling law is needed to enforce it. Bills filed to define and enforce the ban against political dynasties have languished in Congress for decades.</p>
+          <p>In cases when the field is more competitive however, the question becomes who the competition is. Yusingco said a candidate's age alone barely have any bearing on its own, especially when candidates from various ages come from the same political family.</p>
         </div>
 
         <div className='BodyText'>
-          <p>Age, therefore, likely only have little influence on policymaking when weighed against familial ties in public office, Anthony Lawrence Borja, a political scientist at De La Salle University, said.</p>
+          <p>"I think if it's non-dynastic young candidates who are running for office, then I would say that is a good development for our politics and governance. But if it's a young dynastic candidate running, then it's probably not a good thing," he said.</p>
         </div>
 
         <div className='BodyText'>
-          <p>However, that does not mean the impact is nil. For instance, Borja said having young people in politics can help sway government decisions which may tend to "ensure conservatism— may it be right-wing or left-wing" persists. "They can easily outvote and dominate younger representatives in the same way that they can easily dismiss movements that offend their crystallized opinions," he explained.</p>
+          <p>"Dynastic youth candidates running for office just cements the domination of political dynasties over politics and governance," he added.</p>
         </div>
 
 
@@ -117,14 +109,97 @@ function App() {
       }}>
 
         <div className='BodyText'>
-          <p>Yusingco cited the case of Pasig Mayor Vico Sotto as an example of a young politician, which successfully branded himself apart from his familial ties in government service. "But [he] is the only exception I'm aware of," he said.</p>
+          <p>Political dynasties are a fixture of Philippine politics even if the Constitution prohibits it. Part of the problem is the Supreme Court had consistently ruled that the charter provision is not enforceable without an enabling law. Bills filed to define and enforce the ban against political dynasties have languished in Congress for decades.</p>
         </div>
 
         <div className='BodyText'>
-          <p>By sex, Comelec data showed the median age of male and female candidates also does not differ that much at 56 and 51 years, respectively.</p>
+          <p>In a report last January, the Philippine Center for Investigative Journalism has found that <a href="https://pcij.org/2025/01/26/113-out-of-149-philippine-cities-also-ruled-by-political-dynasties/" target="_blank">113 of 149 Philippine cities</a> are ruled by a political dynasty, which they defined as when relatives of current public officials run for public office in the same location.</p>
+        </div>
+
+        <div className='BodyText'>
+          <p>At the House race this year, many examples stand out. In Davao, Augusto Javier Campos III, 32, of the Garcia clan and Omar Vincent Duterte, 30, grandson of former president Rodrigo Duterte, are both running for representation of the second district.</p>
         </div>
 
       </section>
+
+      <section style={{
+        position: 'relative',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        maxWidth: '930px',
+      }}>
+
+        <div className='ChartText'>
+          <h3>More male than female candidates for the House of Representatives</h3>
+          <p>Age distribution, by sex</p>
+        </div>
+
+      </section>
+      <BySex />
+
+      <section style={{
+        position: 'relative',
+        padding: '0.5rem',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        maxWidth: '800px',
+        zIndex: 2
+      }}>
+
+        <div className='BodyText'>
+          <p>These familial relationships, in turn, dilute what anecdotally is a more liberal sway that younger politicians may have on policymaking, Anthony Lawrence Borja, a political scientist at De La Salle University. Bills meant to expand reproductive health, prohibit gender discrimination and institutionalize marriage equality have all struggled to gain traction in Congress.</p>
+        </div>
+
+        <div className='BodyText'>
+          <p>"Old people in legislative positions ensure that conservatism of all sorts (may it be right-wing or left-wing) would rule policy making. They can easily outvote and dominate younger representatives in the same way that they can easily dismiss movements that offend their crystallized opinions," Borja explained.</p>
+        </div>
+
+        <div className='BodyText'>
+          <p>"We can't teach old dogs new tricks and it's difficult to make old legislators advocate for radically new policies even if such are necessary for public welfare," he added.</p>
+        </div>
+        </section>
+        
+        <section style={{
+        position: 'relative',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        maxWidth: '930px',
+      }}>
+
+        <div className='ChartText'>
+          <h3>More male than female candidates for the House of Representatives</h3>
+          <p>Age distribution, by sex</p>
+        </div>
+
+      </section>
+      <BySex />
+
+      <section style={{
+        position: 'relative',
+        padding: '0.5rem',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        maxWidth: '800px',
+        zIndex: 2
+      }}>
+
+        <div className='BodyText'>
+          <p>By sex, Comelec data showed the median age of male and female candidates does not differ that much at 56 and 51 years, respectively. Most women candidates, including six of the 10 youngest candidates, are based in Mindanao.</p>
+        </div>
+
+        <div className='BodyText'>
+          <p>Yusingco said an “non-dynastic” politician is an exception rather than the rule and so far, he can only think of one that epitomizes that in local politics.</p>
+        </div>
+
+        <div className='BodyText'>
+          <p>"[Pasig] Mayor Vico Sotto is the only exception to this rule that I'm aware of," he said. <strong><em>Prinz Magtulis</em></strong></p>
+        </div>
+
+
+        </section>
+
+
+
     </div>
   );
 }
