@@ -3,7 +3,9 @@ import './index.css';
 import Headline from './components/Headline';
 import HorizontalScroll from './components/HorizontalScroll';
 import BySex from './components/BySex';
-import ByIsland from './components/ByIsland';
+import ByMunicipality from './components/ByMunicipality';
+import Parliament from './components/Parliament';
+import ChartHead from './components/ChartHead';
 
 function App() {
   return (
@@ -37,19 +39,11 @@ function App() {
 
       </section>
 
-      <section style={{
-        position: 'relative',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: '800px',
-      }}>
-        <div className='ChartText'>
-          <h3>Philippine House lawmakers are younger than counterparts in the region</h3>
-          <p>Average age of lawmakers at the lower house of congress or a unicameral parliament</p>
-        </div>
 
-      </section>
-      <ByIsland
+
+        <ChartHead ChartHeader="Philippine House lawmakers are in the middle of the pack in the region" ChartSubhead="Average age of lawmakers of current lower houses of congress and unicameral parliaments" />
+
+      <Parliament
       />
 
       <section style={{
@@ -82,22 +76,13 @@ function App() {
         </div>
 
 
-        </section>
-
-      <section style={{
-        position: 'relative',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: '930px',
-      }}>
-
-        <div className='ChartText'>
-          <h3>Mindanao House candidates are slightly younger than rest of the country</h3>
-          <p>Median age of candidates for district representatives in 2025 elections</p>
-        </div>
-
       </section>
-      <ByIsland
+
+
+<ChartHead ChartHeader="More candidates, lower median age... at least in some cases" ChartSubhead="Number of candidates for district representatives and their median age in select provinces for 2025 elections" />
+
+
+      <ByMunicipality
       />
 
       <section style={{
@@ -123,19 +108,9 @@ function App() {
 
       </section>
 
-      <section style={{
-        position: 'relative',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: '930px',
-      }}>
 
-        <div className='ChartText'>
-          <h3>More male than female candidates for the House of Representatives</h3>
-          <p>Age distribution, by sex</p>
-        </div>
+<ChartHead ChartHeader="Bills to prohibit political dynasties in public office stuck in congress" ChartSubhead="Age distribution, by sex" />
 
-      </section>
       <BySex />
 
       <section style={{
@@ -158,21 +133,11 @@ function App() {
         <div className='BodyText'>
           <p>"We can't teach old dogs new tricks and it's difficult to make old legislators advocate for radically new policies even if such are necessary for public welfare," he added.</p>
         </div>
-        </section>
-        
-        <section style={{
-        position: 'relative',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: '930px',
-      }}>
-
-        <div className='ChartText'>
-          <h3>More male than female candidates for the House of Representatives</h3>
-          <p>Age distribution, by sex</p>
-        </div>
-
       </section>
+
+
+<ChartHead ChartHeader="More male than female candidates for the House of Representatives" ChartSubhead="Age distribution, by sex" />
+
       <BySex />
 
       <section style={{
@@ -197,7 +162,18 @@ function App() {
         </div>
 
 
-        </section>
+        <div className='BodyText'>
+        <p><strong>Sources:</strong></p>
+        <p>Author's research, Inter-Parliamentary Union, Philippine House of Representatives</p>
+        <br></br>
+        <em> Copyright 2025 - The
+          <a href="https://www.data-dict.com" target="_blank"
+            > Data Dictionary</a> Project
+        </em>
+      </div>
+
+
+      </section>
 
 
 

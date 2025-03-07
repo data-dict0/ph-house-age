@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
   margin: 0;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -12,31 +13,11 @@ code {
     monospace;
 }
 
-h1 {
-text-align: center;
-}
-
-.dek {
-  font-weight: lighter;
-  text-align: center;
-  font-size: 18px;
-  display: block;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-  overflow-wrap: break-word;
-  hyphens: auto;
-}
-
 a {
   text-decoration-color: #212529;
   color: #212529;
 }
 
-.byline {
-  text-align: center;
-}
-
 .hide-scrollbar::-webkit-scrollbar {
- display: none;
+  display: none;
 }

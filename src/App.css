@@ -14,16 +14,6 @@
    line-height: 27px;   
 }
 
-.ChartText {
-  margin: 1rem 0;
-  padding: 0px 5px;
-  line-height: 27px;   
-}
-
-h3, p {
-  margin: 5px;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
