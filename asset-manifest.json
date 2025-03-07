@@ -1,19 +1,22 @@
 {
   "files": {
-    "main.css": "/ph-house-age/static/css/main.560f564d.css",
-    "main.js": "/ph-house-age/static/js/main.7377a9b4.js",
+    "main.css": "/ph-house-age/static/css/main.9916c3cd.css",
+    "main.js": "/ph-house-age/static/js/main.64286123.js",
     "static/js/453.eacd2753.chunk.js": "/ph-house-age/static/js/453.eacd2753.chunk.js",
     "static/media/BySex-Artboard_3.png": "/ph-house-age/static/media/BySex-Artboard_3.09a0579313260fb98376.png",
     "static/media/BySex-Artboard_2.png": "/ph-house-age/static/media/BySex-Artboard_2.0187f162e30528a87821.png",
     "static/media/BySex-Artboard_1.png": "/ph-house-age/static/media/BySex-Artboard_1.48f5303b60255b93715c.png",
     "static/media/total_age.svg": "/ph-house-age/static/media/total_age.049d1010e5b03b54b04b3207adeb7fa6.svg",
+    "static/media/Parliament-Artboard_2.png": "/ph-house-age/static/media/Parliament-Artboard_2.d35c079341e0f5458401.png",
+    "static/media/Parliament-Artboard_1.png": "/ph-house-age/static/media/Parliament-Artboard_1.a464528c86856599b616.png",
+    "static/media/Parliament-Artboard_3.png": "/ph-house-age/static/media/Parliament-Artboard_3.e1cd7f58fded8533b7f3.png",
     "index.html": "/ph-house-age/index.html",
-    "main.560f564d.css.map": "/ph-house-age/static/css/main.560f564d.css.map",
-    "main.7377a9b4.js.map": "/ph-house-age/static/js/main.7377a9b4.js.map",
+    "main.9916c3cd.css.map": "/ph-house-age/static/css/main.9916c3cd.css.map",
+    "main.64286123.js.map": "/ph-house-age/static/js/main.64286123.js.map",
     "453.eacd2753.chunk.js.map": "/ph-house-age/static/js/453.eacd2753.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.560f564d.css",
-    "static/js/main.7377a9b4.js"
+    "static/css/main.9916c3cd.css",
+    "static/js/main.64286123.js"
   ]
 }
