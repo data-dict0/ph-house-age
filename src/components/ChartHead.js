@@ -17,6 +17,13 @@ function ChartHead(props) {
         margin-right: auto;
         max-width: 800px;
   }
+
+    /* Add media queries to control which artboard shows at different screen sizes */
+    @media (max-width: 559px) {
+        .ChartContainer {
+            margin-left: 10px;
+        }
+    }
 `
   return (
     <section className='ChartContainer'>

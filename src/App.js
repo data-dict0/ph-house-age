@@ -45,6 +45,9 @@ function App() {
 
       <Parliament
       />
+      <div id='CaptionContainer'>
+          <p>Note: Data as of February 2025.<br></br>Source: Inter-Parliamentary Union</p>
+      </div>
 
       <section style={{
         position: 'relative',
@@ -79,11 +82,16 @@ function App() {
       </section>
 
 
-<ChartHead ChartHeader="More candidates, lower median age... at least in some cases" ChartSubhead="Number of candidates for district representatives and their median age in select provinces for 2025 elections" />
+<ChartHead ChartHeader="More candidates for the House, but not necessarily younger" ChartSubhead="Number of candidates for district representatives and their median age in select provinces for 2025 elections" />
 
 
       <ByMunicipality
       />
+        <div id='CaptionContainer'>
+          <div className='Caption'>
+          <p>Note: Data based on all legislative districts of each province or city.<br></br>Source: Author's analysis of Comelec data</p>
+      </div>
+      </div>
 
       <section style={{
         position: 'relative',
@@ -109,7 +117,7 @@ function App() {
       </section>
 
 
-<ChartHead ChartHeader="Bills to prohibit political dynasties in public office stuck in congress" ChartSubhead="Age distribution, by sex" />
+<ChartHead ChartHeader="Bills that prohibit political dynasties in government left stuck in Congress" ChartSubhead="Numerous measures to ban political dynasties have been filed and refiled at the House of Representatives through the years. None have gone beyond the first approval. " />
 
       <BySex />
 
