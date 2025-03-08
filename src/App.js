@@ -12,6 +12,7 @@ function App() {
     <div>
       <Headline title="Does age matter in Philippine elections?" dek="Over half of the candidates for Philippines' House of Representatives are over 55 years old, the median age. Analysts say it's a reflection of the grip political dynasties in politics." />
 
+
       <section style={{ height: '100vh' }}>
         <HorizontalScroll />
       </section>
@@ -168,10 +169,11 @@ function App() {
         <div className='BodyText'>
           <p>"[Pasig] Mayor Vico Sotto is the only exception to this rule that I'm aware of," he said. <strong><em>Prinz Magtulis</em></strong></p>
         </div>
+        <br></br>
 
 
         <div className='BodyText'>
-        <p><strong>Sources:</strong></p>
+        <p><strong>Sources</strong></p>
         <p>Author's research, Inter-Parliamentary Union, Philippine House of Representatives</p>
         <br></br>
         <em> Copyright 2025 - The
