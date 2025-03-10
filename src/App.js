@@ -154,6 +154,10 @@ function App() {
 
       <BySex />
 
+      <div id='CaptionContainer'>
+          <p>Source: Author's analysis of Comelec data</p>
+      </div>
+
       <section style={{
         position: 'relative',
         padding: '0.5rem',
