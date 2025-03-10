@@ -40,19 +40,36 @@ const HorizontalScroll = () => {
             // Ensure full reveal by using a threshold of 0.9
             const scrollPercentage = Math.min(100, (scrollLeft / (maxScroll * 0.9)) * 100);
             
-            // Direct style update
-            imageContainerRef.current.style.clipPath = `inset(0 ${Math.max(0, 100 - scrollPercentage)}% 0 0)`;
+            // Direct style update - Force !important to override any potential conflicts
+            imageContainerRef.current.style.cssText = `
+                position: absolute;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                clip-path: inset(0 ${Math.max(0, 100 - scrollPercentage)}% 0 0) !important;
+                will-change: clip-path;
+                transition: none;
+            `;
             
             // Set end state when we're at 99% or more
             if (scrollPercentage >= 99 && !isAtEnd) {
                 // Force full reveal
-                imageContainerRef.current.style.clipPath = `inset(0 0% 0 0)`;
+                imageContainerRef.current.style.cssText = `
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    clip-path: inset(0 0% 0 0) !important;
+                    will-change: clip-path;
+                    transition: none;
+                `;
                 setIsAtEnd(true);
             }
         }
     };
 
-    // Reset function to allow going back to start
     const resetScroll = () => {
         // Only reset if we've scrolled back above the section
         if (window.scrollY < sectionTop - 50) {
@@ -61,7 +78,16 @@ const HorizontalScroll = () => {
                 containerRef.current.scrollLeft = 0;
             }
             if (imageContainerRef.current) {
-                imageContainerRef.current.style.clipPath = 'inset(0 100% 0 0)';
+                imageContainerRef.current.style.cssText = `
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    clip-path: inset(0 100% 0 0) !important;
+                    will-change: clip-path;
+                    transition: none;
+                `;
             }
         }
     };
@@ -163,7 +189,42 @@ const HorizontalScroll = () => {
                 
                 // Update horizontal scroll position
                 container.scrollLeft = targetScrollLeft;
-                updateReveal(targetScrollLeft);
+                
+                // MOBILE FIX: More aggressive reveal update
+                if (isMobile) {
+                    // Directly calculate and apply clip-path for mobile
+                    if (imageContainerRef.current) {
+                        const revealPercentage = Math.min(100, (progress / 0.9) * 100);
+                        imageContainerRef.current.style.cssText = `
+                            position: absolute;
+                            inset: 0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: flex-start;
+                            clip-path: inset(0 ${Math.max(0, 100 - revealPercentage)}% 0 0) !important;
+                            will-change: clip-path;
+                            transition: none;
+                        `;
+                        
+                        // Force full reveal when near completion
+                        if (progress >= 0.9 && !isAtEnd) {
+                            imageContainerRef.current.style.cssText = `
+                                position: absolute;
+                                inset: 0;
+                                display: flex;
+                                align-items: center;
+                                justify-content: flex-start;
+                                clip-path: inset(0 0% 0 0) !important;
+                                will-change: clip-path;
+                                transition: none;
+                            `;
+                            setIsAtEnd(true);
+                        }
+                    }
+                } else {
+                    // Desktop behavior
+                    updateReveal(targetScrollLeft);
+                }
                 
                 // CRITICAL: Prevent vertical scrolling during horizontal phase
                 // If trying to scroll past the section height, reset to section height
@@ -210,7 +271,7 @@ const HorizontalScroll = () => {
                 section.style.width = '100%';
             }
         };
-    }, [sectionTop, sectionHeight, scrollDistance, isAtEnd]);
+    }, [sectionTop, sectionHeight, scrollDistance, isAtEnd, isMobile]);
 
     // Handle horizontal scroll events directly
     useEffect(() => {
@@ -316,7 +377,7 @@ const HorizontalScroll = () => {
                         />
                     </div>
                     
-                    {/* Revealing image */}
+                    {/* Revealing image - initial setup only, will be controlled via direct DOM manipulation */}
                     <div 
                         ref={imageContainerRef}
                         style={{
@@ -327,7 +388,8 @@ const HorizontalScroll = () => {
                             justifyContent: 'flex-start',
                             clipPath: 'inset(0 100% 0 0)',
                             willChange: 'clip-path',
-                            transition: 'none'
+                            transition: 'none',
+                            zIndex: 10 // Ensure colored image is always on top
                         }}
                     >
                         <img 
