@@ -5,9 +5,33 @@ import totalAgeSvg from '../assets/total_age.svg';
 const HorizontalScroll = () => {
     const containerRef = useRef(null);
     const imageContainerRef = useRef(null);
+    const sectionRef = useRef(null);
     const [isAtEnd, setIsAtEnd] = useState(false);
-    const [isScrolling, setIsScrolling] = useState(false);
-    const [hasCompletedOnce, setHasCompletedOnce] = useState(false);
+    const [scrollDistance, setScrollDistance] = useState(0);
+    const [sectionHeight, setSectionHeight] = useState(0);
+    const [sectionTop, setSectionTop] = useState(0);
+    const [isMobile, setIsMobile] = useState(false);
+    
+    // Detect mobile devices
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        
+        return () => {
+            window.removeEventListener('resize', checkMobile);
+        };
+    }, []);
+    
+    // Calculate the total horizontal scroll distance
+    useEffect(() => {
+        if (containerRef.current) {
+            setScrollDistance(containerRef.current.scrollWidth - containerRef.current.clientWidth);
+        }
+    }, []);
 
     // Update the reveal effect based on scroll position
     const updateReveal = (scrollLeft) => {
@@ -15,7 +39,7 @@ const HorizontalScroll = () => {
             const maxScroll = containerRef.current.scrollWidth - containerRef.current.clientWidth;
             const scrollPercentage = (scrollLeft / maxScroll) * 100;
             
-            // Update the clip path based on scroll percentage
+            // Always update the clip path based on scroll percentage
             imageContainerRef.current.style.clipPath = `inset(0 ${Math.max(0, 100 - scrollPercentage)}% 0 0)`;
             
             // Determine if we're at the end
@@ -23,304 +47,329 @@ const HorizontalScroll = () => {
             
             if (reachedEnd && !isAtEnd) {
                 setIsAtEnd(true);
-                setHasCompletedOnce(true);
             } else if (!reachedEnd && isAtEnd) {
                 setIsAtEnd(false);
             }
         }
     };
 
-    // Clean up and handle section visibility when component mounts/unmounts
-    useEffect(() => {
-        // Get the next section (to manage its visibility)
-        const thisSection = containerRef.current?.closest('section');
-        const nextSection = thisSection?.nextElementSibling;
-        
-        // Initially hide the next section until horizontal scroll is complete
-        if (nextSection && !isAtEnd) {
-            nextSection.style.visibility = 'hidden';
-            nextSection.style.pointerEvents = 'none'; // Prevent any interaction
-        }
-        
-        // Cleanup - ensure next section is visible when component unmounts
-        return () => {
-            if (nextSection) {
-                nextSection.style.visibility = 'visible';
-                nextSection.style.pointerEvents = 'auto';
-            }
-        };
-    }, [isAtEnd]);
-    
-    // Watch for changes in isAtEnd to manage next section visibility
-    useEffect(() => {
-        const thisSection = containerRef.current?.closest('section');
+    // CRITICAL FUNCTION: Force strict separation between sections
+    const applySectionSeparation = () => {
+        const thisSection = sectionRef.current;
         const nextSection = thisSection?.nextElementSibling;
         
         if (nextSection) {
-            // Only show next section when horizontal scroll is complete
+            // 1. Ensure the next section starts with a clean slate
+            nextSection.style.position = 'relative';
+            nextSection.style.zIndex = '1'; // Lower than our section
+            
+            // 2. Add significant spacing between sections (350px)
+            nextSection.style.marginTop = '350px';
+            
+            // 3. Set visibility based on scroll completion
             nextSection.style.visibility = isAtEnd ? 'visible' : 'hidden';
-            nextSection.style.pointerEvents = isAtEnd ? 'auto' : 'none'; // Prevent any interaction
-        }
-    }, [isAtEnd]);
-
-    // Handle regular scrolling on the component
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
-
-        const handleScroll = () => {
-            updateReveal(container.scrollLeft);
-        };
-
-        container.addEventListener('scroll', handleScroll, { passive: true });
-        return () => {
-            container.removeEventListener('scroll', handleScroll);
-        };
-    }, [isAtEnd]);
-
-    // Integrated vertical and horizontal scrolling effect
-    useEffect(() => {
-        // Get current window scroll position
-        let lastScrollY = window.scrollY;
-        let isManuallyScrolling = false;
-        let scrollingTimer = null;
-        
-        // Get the scroll range for our section
-        const getSectionScrollRange = () => {
-            const thisSection = containerRef.current?.closest('section');
-            if (!thisSection) return { top: 0, height: 0 };
+            nextSection.style.pointerEvents = isAtEnd ? 'auto' : 'none';
             
-            const rect = thisSection.getBoundingClientRect();
-            return {
-                top: window.scrollY + rect.top,
-                height: rect.height
-            };
-        };
-        
-        // Calculate horizontal scroll from vertical position
-        const updateHorizontalFromVertical = () => {
-            const container = containerRef.current;
-            if (!container) return;
-            
-            const { top, height } = getSectionScrollRange();
-            const maxScroll = container.scrollWidth - container.clientWidth;
-            
-            // If we're within the section's scroll range
-            if (window.scrollY >= top && window.scrollY <= top + height) {
-                // Calculate progress through section (0 to 1)
-                const progress = Math.min(1, (window.scrollY - top) / height);
-                
-                // Apply to horizontal scroll
-                const targetScrollLeft = progress * maxScroll;
-                container.scrollLeft = targetScrollLeft;
-                updateReveal(targetScrollLeft);
-                
-                // Set end status when near the end
-                if (progress >= 0.95 && !isAtEnd) {
-                    setIsAtEnd(true);
-                    setHasCompletedOnce(true);
-                } else if (progress < 0.95 && isAtEnd) {
-                    setIsAtEnd(false);
-                }
-            }
-        };
-
-        const handleWheel = (e) => {
-            // Get the headline element
-            const headline = document.querySelector('header') || 
-                             document.querySelector('.headline') || 
-                             document.querySelector('h1');
-            
-            // Get the section after this one
-            const thisSection = containerRef.current?.closest('section');
-            const nextSection = thisSection?.nextElementSibling;
-            
-            // Check if headline is still visible
-            let headlineVisible = false;
-            if (headline) {
-                const headlineRect = headline.getBoundingClientRect();
-                headlineVisible = (headlineRect.bottom > 0);
+            // 4. Create a hard barrier using overflow properties
+            if (!isAtEnd) {
+                // When scrolling horizontally, next section is completely hidden
+                nextSection.style.position = 'absolute';
+                nextSection.style.top = '1000vh'; // Push far below viewport
             } else {
-                headlineVisible = (window.scrollY < 120);
+                // Reset position when horizontal scroll is complete
+                nextSection.style.position = 'relative';
+                nextSection.style.top = 'auto';
             }
             
-            // If headline is still visible, allow normal scrolling
-            if (headlineVisible) {
+            // 5. Apply styles to parent container if needed
+            const parentElement = thisSection.parentElement;
+            if (parentElement) {
+                parentElement.style.position = 'relative';
+                parentElement.style.overflow = 'hidden';
+            }
+        }
+    };
+
+    // Handle visibility and positioning of next section
+    useEffect(() => {
+        // Apply strict separation between sections
+        applySectionSeparation();
+        
+        // Cleanup
+        return () => {
+            const nextSection = sectionRef.current?.nextElementSibling;
+            if (nextSection) {
+                nextSection.style.visibility = 'visible';
+                nextSection.style.pointerEvents = 'auto';
+                nextSection.style.position = 'relative';
+                nextSection.style.top = 'auto';
+                nextSection.style.marginTop = '0';
+                nextSection.style.zIndex = 'auto';
+            }
+        };
+    }, [isAtEnd]);
+
+    // Main scroll handler - pin section and hijack scrolling
+    useEffect(() => {
+        const section = sectionRef.current;
+        const container = containerRef.current;
+        if (!section || !container) return;
+        
+        // Get initial section metrics
+        const updateSectionMetrics = () => {
+            const rect = section.getBoundingClientRect();
+            setSectionTop(window.scrollY + rect.top);
+            setSectionHeight(rect.height);
+            
+            // Apply strict separation between sections
+            applySectionSeparation();
+        };
+        
+        updateSectionMetrics();
+        
+        // Set up scroll handler
+        const handleScroll = () => {
+            // If we haven't reached the section yet, do nothing special
+            if (window.scrollY < sectionTop) {
+                // Ensure horizontal scroll is reset when scrolling up above the section
+                container.scrollLeft = 0;
+                updateReveal(0);
                 return;
             }
             
-            // Let the page scroll naturally - horizontal will update from scroll position
+            // If we're at the end of horizontal scroll and below the section, do nothing
+            if (isAtEnd && window.scrollY > sectionTop + sectionHeight + 350) { // Added buffer zone
+                return;
+            }
+            
+            // If we're in the section's range and not at the end, pin the section and control horizontal scroll
             if (!isAtEnd) {
-                // Just make sure next section isn't visible during horizontal scroll
-                if (nextSection) {
-                    nextSection.style.visibility = 'hidden';
-                    nextSection.style.pointerEvents = 'none';
+                // Pin the section
+                section.style.position = 'fixed';
+                section.style.top = '0';
+                section.style.left = '0';
+                section.style.width = '100%';
+                section.style.zIndex = '10'; // Higher than other content
+                
+                // Calculate what percentage of section height we've scrolled
+                const scrollProgress = Math.min(1, (window.scrollY - sectionTop) / sectionHeight);
+                const targetScrollLeft = scrollProgress * scrollDistance;
+                
+                // Update horizontal scroll - this reveals the image
+                container.scrollLeft = targetScrollLeft;
+                updateReveal(targetScrollLeft);
+                
+                // Block any attempt to scroll below the section
+                if (window.scrollY > sectionTop + sectionHeight && !isAtEnd) {
+                    window.scrollTo({
+                        top: sectionTop + sectionHeight,
+                        behavior: 'auto'
+                    });
                 }
-            } 
-            // If at end, make next section visible
-            else if (isAtEnd) {
-                if (nextSection) {
-                    nextSection.style.visibility = 'visible';
-                    nextSection.style.pointerEvents = 'auto';
-                }
+            } else {
+                // If horizontal scroll is complete, unpin the section
+                section.style.position = 'relative';
+                section.style.top = 'auto';
+                section.style.left = 'auto';
             }
         };
-
-        // Watch page scrolling to update horizontal scroll
-        const handleWindowScroll = () => {
-            // Update horizontal scroll based on vertical position
-            updateHorizontalFromVertical();
-            
-            // If scrolling up to the top, reset horizontal scroll
-            if (window.scrollY < 50 && lastScrollY > window.scrollY && !isManuallyScrolling) {
-                if (containerRef.current) {
-                    containerRef.current.scrollLeft = 0;
-                    updateReveal(0);
-                    setIsAtEnd(false);
-                }
-            }
-            
-            lastScrollY = window.scrollY;
-        };
-
-        // Initial setup on mount
-        updateHorizontalFromVertical();
-
-        // Add event listeners
-        window.addEventListener('wheel', handleWheel, { passive: true }); // Allow natural scrolling
-        window.addEventListener('scroll', handleWindowScroll, { passive: true });
         
-        return () => {
-            window.removeEventListener('wheel', handleWheel);
-            window.removeEventListener('scroll', handleWindowScroll);
-            clearTimeout(window.scrollTimer);
-            clearTimeout(scrollingTimer);
+        // Handle resize events
+        const handleResize = () => {
+            updateSectionMetrics();
+            setScrollDistance(container.scrollWidth - container.clientWidth);
+            
+            // Re-apply scroll handler to update positioning
+            handleScroll();
         };
-    }, [isAtEnd]);
+        
+        // Add event listeners
+        window.addEventListener('scroll', handleScroll, { passive: false });
+        window.addEventListener('resize', handleResize, { passive: true });
+        window.addEventListener('orientationchange', handleResize, { passive: true });
+        
+        // Initialize scroll state
+        handleScroll();
+        
+        // Clean up
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('orientationchange', handleResize);
+            
+            // Reset styles
+            section.style.position = 'relative';
+            section.style.top = 'auto';
+            section.style.left = 'auto';
+            section.style.width = 'auto';
+            section.style.zIndex = 'auto';
+        };
+    }, [sectionTop, sectionHeight, scrollDistance, isAtEnd]);
 
-    // Mobile touch support - Integrated with vertical page scrolling
+    // Handle direct horizontal scroll events
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
+        
+        const handleHorizontalScroll = () => {
+            updateReveal(container.scrollLeft);
+        };
+        
+        container.addEventListener('scroll', handleHorizontalScroll, { passive: true });
+        
+        return () => {
+            container.removeEventListener('scroll', handleHorizontalScroll);
+        };
+    }, []);
 
-        let touchStartX = 0;
+    // IMPROVED Mobile touch handling - specifically for the reveal effect
+    useEffect(() => {
+        const section = sectionRef.current;
+        const container = containerRef.current;
+        if (!section || !container) return;
+        
         let touchStartY = 0;
-        let initialScrollY = 0;
-        let lastTouchY = 0;
+        let touchStartX = 0;
+        let lastScrollPosition = 0;
         
-        // Get the scroll range for our section
-        const getSectionScrollRange = () => {
-            const thisSection = containerRef.current?.closest('section');
-            if (!thisSection) return { top: 0, height: 0, bottom: 0 };
-            
-            const rect = thisSection.getBoundingClientRect();
-            return {
-                top: window.scrollY + rect.top,
-                height: rect.height,
-                bottom: window.scrollY + rect.bottom
-            };
-        };
-        
-        // Check if headline is visible
-        const headlineIsVisible = () => {
-            const headline = document.querySelector('header') || 
-                             document.querySelector('.headline') || 
-                             document.querySelector('h1');
-            
-            if (headline) {
-                const headlineRect = headline.getBoundingClientRect();
-                return (headlineRect.bottom > 0);
-            }
-            return (window.scrollY < 120);
-        };
-
-        // Get the next section
-        const getNextSection = () => {
-            const thisSection = containerRef.current?.closest('section');
-            return thisSection?.nextElementSibling;
-        };
-
-        // Convert a vertical scroll position to horizontal scroll position
-        const verticalToHorizontal = (scrollY) => {
-            const { top, height } = getSectionScrollRange();
-            const maxScroll = container.scrollWidth - container.clientWidth;
-            
-            // Calculate progress through section (0 to 1)
-            const progress = Math.min(1, Math.max(0, (scrollY - top) / height));
-            
-            // Apply to horizontal scroll
-            return progress * maxScroll;
-        };
-
         const handleTouchStart = (e) => {
-            touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
-            lastTouchY = touchStartY;
-            initialScrollY = window.scrollY;
-        };
-
-        const handleTouchMove = (e) => {
-            if (e.touches.length !== 1) return;
+            touchStartX = e.touches[0].clientX;
+            lastScrollPosition = window.scrollY;
             
-            const touchX = e.touches[0].clientX;
-            const touchY = e.touches[0].clientY;
-            const movementY = lastTouchY - touchY;
-            lastTouchY = touchY;
-            
-            const nextSection = getNextSection();
-            const range = getSectionScrollRange();
-            
-            // Update vertical scroll
-            window.scrollBy(0, movementY);
-            
-            // If we're in our section
-            if (window.scrollY >= range.top && window.scrollY <= range.bottom) {
-                // Hide next section until horizontal scroll is complete
-                if (nextSection && !isAtEnd) {
-                    nextSection.style.visibility = 'hidden';
-                    nextSection.style.pointerEvents = 'none';
-                } else if (nextSection && isAtEnd) {
-                    nextSection.style.visibility = 'visible';
-                    nextSection.style.pointerEvents = 'auto';
-                }
-                
-                // Convert vertical scroll to horizontal
-                const targetScrollLeft = verticalToHorizontal(window.scrollY);
-                container.scrollLeft = targetScrollLeft;
+            // Record the initial scroll position - important for mobile
+            if (!isAtEnd) {
+                // Calculate and apply initial reveal based on scroll position
+                const scrollProgress = Math.min(1, (window.scrollY - sectionTop) / sectionHeight);
+                const targetScrollLeft = scrollProgress * scrollDistance;
                 updateReveal(targetScrollLeft);
             }
         };
-
-        // Add event listeners
-        container.addEventListener('touchstart', handleTouchStart, { passive: true });
-        document.addEventListener('touchmove', handleTouchMove, { passive: true });
+        
+        const handleTouchMove = (e) => {
+            if (e.touches.length !== 1) return;
+            
+            const touchY = e.touches[0].clientY;
+            const touchX = e.touches[0].clientX;
+            const deltaY = touchStartY - touchY;
+            const deltaX = touchStartX - touchX;
+            
+            // If we're in the section and haven't completed horizontal scroll
+            if (!isAtEnd && window.scrollY >= sectionTop && window.scrollY <= sectionTop + sectionHeight) {
+                // First, verify the direction and block incompatible scrolling
+                if (Math.abs(deltaY) > 10) {
+                    e.preventDefault(); // Prevent default vertical scroll
+                    
+                    // Calculate the scroll position change
+                    const scrollDelta = window.scrollY - lastScrollPosition;
+                    
+                    // Convert vertical swipe to horizontal scroll with stronger effect
+                    const scrollProgress = Math.min(1, (window.scrollY - sectionTop) / sectionHeight);
+                    const additionalProgress = deltaY / (sectionHeight * 0.5); // More sensitive
+                    
+                    // Calculate new target scroll left position
+                    const newProgress = Math.max(0, Math.min(1, scrollProgress + additionalProgress));
+                    const targetScrollLeft = newProgress * scrollDistance;
+                    
+                    // Force the horizontal scroll position
+                    container.scrollLeft = targetScrollLeft;
+                    
+                    // Explicitly update the reveal effect
+                    updateReveal(targetScrollLeft);
+                    
+                    // For extreme cases, directly manipulate the clip path
+                    if (imageContainerRef.current) {
+                        const revealPercentage = newProgress * 100;
+                        imageContainerRef.current.style.clipPath = 
+                            `inset(0 ${Math.max(0, 100 - revealPercentage)}% 0 0)`;
+                    }
+                }
+                
+                // Update the last position
+                lastScrollPosition = window.scrollY;
+                touchStartY = touchY;
+                touchStartX = touchX;
+            }
+        };
+        
+        // Handle touch end - ensure we check for completion
+        const handleTouchEnd = () => {
+            if (container.scrollLeft >= scrollDistance * 0.95) {
+                setIsAtEnd(true);
+            }
+        };
+        
+        // Add touch event listeners for mobile
+        section.addEventListener('touchstart', handleTouchStart, { passive: false });
+        section.addEventListener('touchmove', handleTouchMove, { passive: false });
+        section.addEventListener('touchend', handleTouchEnd, { passive: true });
         
         return () => {
-            container.removeEventListener('touchstart', handleTouchStart);
-            document.removeEventListener('touchmove', handleTouchMove);
+            section.removeEventListener('touchstart', handleTouchStart);
+            section.removeEventListener('touchmove', handleTouchMove);
+            section.removeEventListener('touchend', handleTouchEnd);
         };
-    }, [isAtEnd]);
+    }, [sectionTop, sectionHeight, scrollDistance, isAtEnd]);
+
+    // Add wheel event handler to convert vertical scroll to horizontal
+    useEffect(() => {
+        const section = sectionRef.current;
+        const container = containerRef.current;
+        if (!section || !container) return;
+        
+        const handleWheel = (e) => {
+            // Only intercept wheel events when we're in the section and haven't completed horizontal scroll
+            if (!isAtEnd && window.scrollY >= sectionTop && window.scrollY <= sectionTop + sectionHeight) {
+                e.preventDefault();
+                
+                // Determine scroll direction and amount
+                const delta = e.deltaY || e.deltaX;
+                container.scrollLeft += delta;
+                
+                // Update reveal effect
+                updateReveal(container.scrollLeft);
+                
+                // If we've completed the horizontal scroll, allow vertical scrolling to continue
+                if (container.scrollLeft >= scrollDistance * 0.95) {
+                    setIsAtEnd(true);
+                }
+            }
+        };
+        
+        // Add wheel event listener
+        section.addEventListener('wheel', handleWheel, { passive: false });
+        
+        return () => {
+            section.removeEventListener('wheel', handleWheel);
+        };
+    }, [sectionTop, sectionHeight, scrollDistance, isAtEnd]);
 
     return (
-        <div style={{ 
-            width: '100%', 
-            height: '100%', 
-            overflow: 'hidden',
-            position: 'relative'
-        }}>
+        <section 
+            ref={sectionRef}
+            style={{ 
+                width: '100%', 
+                height: '100vh',
+                overflow: 'hidden',
+                position: 'relative',
+                marginBottom: '350px', // Very large bottom margin
+                paddingBottom: '50px', // Additional padding at the bottom
+                zIndex: '10' // Higher than other content
+            }}
+        >
             <div 
                 ref={containerRef}
                 style={{
                     width: '100%',
-                    height: '100%',
+                    height: '85%', // Reduced height to leave room for buffer
                     marginTop: '25px',
                     overflowX: 'scroll',
                     overflowY: 'hidden',
                     WebkitOverflowScrolling: 'touch',
-                    scrollbarWidth: 'none', // Hide scrollbar for Firefox
-                    msOverflowStyle: 'none', // Hide scrollbar for IE/Edge
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
                 }}
-                className="hide-scrollbar" // Add a class to hide the scrollbar with CSS
+                className="hide-scrollbar"
             >
                 <div style={{ 
                     position: 'relative', 
@@ -345,7 +394,8 @@ const HorizontalScroll = () => {
                                 width: 'auto',
                                 objectFit: 'contain',
                                 userSelect: 'none',
-                                pointerEvents: 'none'
+                                pointerEvents: 'none',
+                                filter: 'grayscale(100%) opacity(40%)'
                             }}
                         />
                     </div>
@@ -360,7 +410,7 @@ const HorizontalScroll = () => {
                             alignItems: 'center',
                             justifyContent: 'flex-start',
                             clipPath: 'inset(0 100% 0 0)',
-                            transition: 'clip-path 0.1s ease-out'
+                            transition: isMobile ? 'none' : 'clip-path 0.1s ease-out' // No transition on mobile for immediate updates
                         }}
                     >
                         <img 
@@ -377,7 +427,49 @@ const HorizontalScroll = () => {
                     </div>
                 </div>
             </div>
-        </div>
+            
+            {/* Large buffer element to ensure spacing after the horizontal scroll content */}
+            <div style={{
+                height: '200px', // Very large buffer space
+                width: '100%',
+                background: 'transparent'
+            }}></div>
+            
+            {/* Scroll indicator */}
+            <div style={{
+                position: 'absolute',
+                bottom: '225px', // Position above the buffer space
+                left: '0',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                opacity: isAtEnd ? 0 : 1,
+                transition: 'opacity 0.5s ease',
+                pointerEvents: 'none',
+                zIndex: '15'
+            }}>
+                <div style={{
+                    padding: '10px 20px',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    color: 'white',
+                    borderRadius: '30px',
+                    fontSize: '14px'
+                }}>
+                    {isMobile ? 'Swipe to continue' : 'Scroll to continue'}
+                </div>
+            </div>
+            
+            {/* Hard barrier to prevent content overlap */}
+            <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                width: '100%',
+                height: '100px',
+                background: 'transparent',
+                zIndex: '5'
+            }}></div>
+        </section>
     );
 };
 
