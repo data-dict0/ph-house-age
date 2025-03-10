@@ -33,7 +33,7 @@ const HorizontalScroll = () => {
         if (containerRef.current) {
             setScrollDistance(containerRef.current.scrollWidth - containerRef.current.clientWidth);
         }
-    }, []);
+    }, [isMobile]); // Added isMobile dependency to recalculate when device type changes
 
     // Update the reveal effect based on scroll position
     const updateReveal = (scrollLeft) => {
@@ -41,12 +41,12 @@ const HorizontalScroll = () => {
             const maxScroll = containerRef.current.scrollWidth - containerRef.current.clientWidth;
             const scrollPercentage = (scrollLeft / maxScroll) * 100;
             
-            // Update the scroll progress state for mobile
-            setScrollProgress(Math.min(1, scrollPercentage / 100));
+            // Update the scroll progress state for both mobile and desktop
+            const newProgress = Math.min(1, scrollPercentage / 100);
+            setScrollProgress(newProgress);
             
-            // For desktop: Always update the clip path based on scroll percentage
-            // For mobile: We'll use opacity instead (controlled via scrollProgress)
-            if (!isMobile) {
+            // For desktop: Update the clip path based on scroll percentage
+            if (!isMobile && imageContainerRef.current) {
                 imageContainerRef.current.style.clipPath = `inset(0 ${Math.max(0, 100 - scrollPercentage)}% 0 0)`;
             }
             
@@ -84,10 +84,12 @@ const HorizontalScroll = () => {
                 // When scrolling horizontally, next section is completely hidden
                 nextSection.style.position = 'absolute';
                 nextSection.style.top = '1000vh'; // Push far below viewport
+                nextSection.style.opacity = '0'; // Ensure it's invisible
             } else {
                 // Reset position when horizontal scroll is complete
                 nextSection.style.position = 'relative';
                 nextSection.style.top = 'auto';
+                nextSection.style.opacity = '1';
             }
             
             // 5. Apply styles to parent container if needed
@@ -95,6 +97,23 @@ const HorizontalScroll = () => {
             if (parentElement) {
                 parentElement.style.position = 'relative';
                 parentElement.style.overflow = 'hidden';
+            }
+            
+            // 6. Apply styles to all following siblings to ensure they're hidden during scroll
+            let sibling = nextSection.nextElementSibling;
+            while (sibling) {
+                if (!isAtEnd) {
+                    sibling.style.position = 'absolute';
+                    sibling.style.top = '2000vh'; // Push even further below
+                    sibling.style.visibility = 'hidden';
+                    sibling.style.opacity = '0';
+                } else {
+                    sibling.style.position = 'relative';
+                    sibling.style.top = 'auto';
+                    sibling.style.visibility = 'visible';
+                    sibling.style.opacity = '1';
+                }
+                sibling = sibling.nextElementSibling;
             }
         }
     };
@@ -143,7 +162,13 @@ const HorizontalScroll = () => {
                 // Ensure horizontal scroll is reset when scrolling up above the section
                 container.scrollLeft = 0;
                 updateReveal(0);
-                setScrollProgress(0);
+                
+                // Make sure section positioning is reset
+                section.style.position = 'relative';
+                section.style.top = 'auto';
+                section.style.left = 'auto';
+                section.style.width = 'auto';
+                
                 return;
             }
             
@@ -163,16 +188,25 @@ const HorizontalScroll = () => {
                 
                 // Calculate what percentage of section height we've scrolled
                 const scrollProgress = Math.min(1, (window.scrollY - sectionTop) / sectionHeight);
-                setScrollProgress(scrollProgress); // Update scroll progress state
                 
                 const targetScrollLeft = scrollProgress * scrollDistance;
                 
                 // Update horizontal scroll - this reveals the image
                 container.scrollLeft = targetScrollLeft;
                 
-                // For desktop, update clip-path
-                if (!isMobile) {
-                    updateReveal(targetScrollLeft);
+                // Update reveal effect for both mobile and desktop
+                updateReveal(targetScrollLeft);
+                
+                // Add a virtual placeholder to maintain scroll position
+                // This is critical to prevent content jumping
+                const bodyPlaceholder = document.createElement('div');
+                bodyPlaceholder.id = 'scroll-placeholder';
+                bodyPlaceholder.style.height = `${sectionHeight}px`;
+                bodyPlaceholder.style.display = 'none';
+                
+                // If a placeholder doesn't exist, add it
+                if (!document.getElementById('scroll-placeholder')) {
+                    document.body.appendChild(bodyPlaceholder);
                 }
                 
                 // Block any attempt to scroll below the section
@@ -187,12 +221,23 @@ const HorizontalScroll = () => {
                 if (scrollProgress >= 0.95 && !isAtEnd) {
                     setIsAtEnd(true);
                     setScrollProgress(1); // Force complete reveal
+                    
+                    // Force a slight delay to ensure smooth transition to next section
+                    setTimeout(() => {
+                        applySectionSeparation();
+                    }, 100);
                 }
             } else {
                 // If horizontal scroll is complete, unpin the section
                 section.style.position = 'relative';
                 section.style.top = 'auto';
                 section.style.left = 'auto';
+                
+                // Remove the placeholder if it exists
+                const placeholder = document.getElementById('scroll-placeholder');
+                if (placeholder) {
+                    placeholder.remove();
+                }
             }
         };
         
@@ -248,53 +293,98 @@ const HorizontalScroll = () => {
     useEffect(() => {
         const section = sectionRef.current;
         const container = containerRef.current;
-        if (!section || !container) return;
+        if (!section || !container || !isMobile) return; // Only apply for mobile
         
         let touchStartY = 0;
-        let touchStartX = 0;
-        let lastScrollPosition = 0;
+        let touchLastY = 0;
+        let lastScrollY = 0;
+        let isTouchScrolling = false;
         
-        // Record the initial scroll position - important for mobile
+        // Record the initial touch position
         const handleTouchStart = (e) => {
             touchStartY = e.touches[0].clientY;
-            touchStartX = e.touches[0].clientX;
-            lastScrollPosition = window.scrollY;
+            touchLastY = touchStartY;
+            lastScrollY = window.scrollY;
+            isTouchScrolling = true;
+            
+            // Make sure the next section is properly hidden during touch scrolling
+            if (!isAtEnd) {
+                applySectionSeparation();
+            }
         };
         
+        // Handle touch movement for mobile reveal
         const handleTouchMove = (e) => {
-            if (e.touches.length !== 1) return;
+            if (!isMobile || isAtEnd || !isTouchScrolling) return;
             
-            const touchY = e.touches[0].clientY;
-            const touchX = e.touches[0].clientX;
-            const deltaY = touchStartY - touchY;
-            const deltaX = touchStartX - touchX;
+            const currentY = e.touches[0].clientY;
+            const deltaY = touchLastY - currentY;
             
-            // Record the initial scroll position - important for mobile
-            if (!isAtEnd) {
-                // Calculate and apply initial reveal based on scroll position
-                const scrollProgress = Math.min(1, (window.scrollY - sectionTop) / sectionHeight);
-                setScrollProgress(scrollProgress);
+            // Prevent default only within the horizontal scroll section
+            // This helps prevent the vertical content from scrolling prematurely
+            if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+                e.preventDefault();
+            }
+            
+            // Update scroll position
+            if (window.scrollY >= sectionTop && !isAtEnd) {
+                // Calculate new scroll progress based on vertical scroll
+                const newScrollY = lastScrollY + deltaY;
+                const effectiveScrollY = Math.max(sectionTop, Math.min(sectionTop + sectionHeight, newScrollY));
+                const newProgress = (effectiveScrollY - sectionTop) / sectionHeight;
                 
-                // For desktop only, update the clip path
-                if (!isMobile) {
-                    const targetScrollLeft = scrollProgress * scrollDistance;
-                    updateReveal(targetScrollLeft);
+                // Apply the scroll progress directly for mobile
+                setScrollProgress(Math.min(1, newProgress));
+                
+                // Update horizontal scroll position
+                const targetScrollLeft = newProgress * scrollDistance;
+                if (container.scrollLeft !== targetScrollLeft) {
+                    container.scrollLeft = targetScrollLeft;
+                }
+                
+                // Block vertical scrolling movement until horizontal is complete
+                if (newScrollY > sectionTop + sectionHeight * 0.5 && !isAtEnd) {
+                    window.scrollTo({
+                        top: sectionTop + sectionHeight * 0.5,
+                        behavior: 'auto'
+                    });
+                }
+                
+                // Check if we've reached the end
+                if (newProgress >= 0.95 && !isAtEnd) {
+                    setIsAtEnd(true);
+                    setScrollProgress(1);
+                    
+                    // Force immediate application of section separation
+                    setTimeout(() => {
+                        applySectionSeparation();
+                    }, 50);
                 }
             }
             
             // Update tracking variables
-            touchStartY = touchY;
-            touchStartX = touchX;
-            lastScrollPosition = window.scrollY;
+            touchLastY = currentY;
+        };
+        
+        // Handle touch end event
+        const handleTouchEnd = () => {
+            isTouchScrolling = false;
+            
+            // Ensure next section visibility is correctly set
+            if (isAtEnd) {
+                applySectionSeparation();
+            }
         };
         
         // Add touch event listeners
         section.addEventListener('touchstart', handleTouchStart, { passive: true });
         section.addEventListener('touchmove', handleTouchMove, { passive: true });
+        section.addEventListener('touchend', handleTouchEnd, { passive: true });
         
         return () => {
             section.removeEventListener('touchstart', handleTouchStart);
             section.removeEventListener('touchmove', handleTouchMove);
+            section.removeEventListener('touchend', handleTouchEnd);
         };
     }, [sectionTop, sectionHeight, scrollDistance, isAtEnd, isMobile]);
 
@@ -340,9 +430,10 @@ const HorizontalScroll = () => {
                 height: '100vh',
                 overflow: 'hidden',
                 position: 'relative',
-                marginBottom: '350px', // Very large bottom margin
+                marginBottom: isMobile ? '450px' : '350px', // Even larger margin on mobile
                 paddingBottom: '50px', // Additional padding at the bottom
-                zIndex: '10' // Higher than other content
+                zIndex: '10', // Higher than other content
+                isolation: 'isolate' // Create a new stacking context
             }}
         >
             <div 
@@ -425,7 +516,8 @@ const HorizontalScroll = () => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'flex-start',
-                                opacity: scrollProgress, // Use opacity instead of clip-path
+                                opacity: scrollProgress, // Use scrollProgress for opacity
+                                transition: 'opacity 0.1s ease-out', // Added transition
                                 zIndex: 5
                             }}
                         >
@@ -485,7 +577,7 @@ const HorizontalScroll = () => {
                 width: '100%',
                 height: '100px',
                 background: 'transparent',
-                zIndex: '5'
+                zIndex: '1'
             }}></div>
         </section>
     );
