@@ -223,7 +223,7 @@ const HorizontalScroll = () => {
         };
     }, []);
 
-    // IMPROVED Mobile touch handling - specifically for the reveal effect
+    // Simplified mobile touch handling
     useEffect(() => {
         if (!isMobile) return; // Only run on mobile
         
@@ -231,109 +231,66 @@ const HorizontalScroll = () => {
         const container = containerRef.current;
         if (!section || !container) return;
         
-        let touchStartY = 0;
-        let lastScrollLeft = 0;
-        let isTouching = false;
+        let startY = 0;
+        let currentY = 0;
+        let scrolling = false;
         
-        // Touch start handler
-        const handleTouchStart = (e) => {
-            // Only handle touch when not at end yet
+        // Mobile scroll handler that maps vertical scroll to horizontal scroll
+        const handleScroll = () => {
             if (isAtEnd) return;
             
-            touchStartY = e.touches[0].clientY;
-            lastScrollLeft = container.scrollLeft;
-            isTouching = true;
+            // Pin the section when in horizontal scroll mode
+            section.style.position = 'fixed';
+            section.style.top = '0';
+            section.style.width = '100%';
+            section.style.zIndex = '100';
             
-            // Prevent default behavior
-            e.preventDefault(); 
-        };
-        
-        // Touch move handler
-        const handleTouchMove = (e) => {
-            if (!isTouching || isAtEnd) return;
+            // Calculate scroll progress (how far down the section we've scrolled)
+            const scrollProgress = Math.min(1, Math.max(0, (window.scrollY - sectionTop) / sectionHeight));
             
-            // Get the current touch position
-            const touchY = e.touches[0].clientY;
-            const deltaY = touchStartY - touchY;
+            // Map scroll progress to horizontal scroll distance
+            const targetScrollLeft = scrollProgress * scrollDistance;
+            container.scrollLeft = targetScrollLeft;
             
-            // Block vertical scrolling
-            e.preventDefault();
-            
-            // Convert vertical swipe to horizontal scroll
-            // Using a smaller divisor makes this more sensitive (was 2.5)
-            const scrollDelta = (deltaY / 1.5);
-            const newScrollLeft = Math.max(0, Math.min(scrollDistance, lastScrollLeft + scrollDelta));
-            
-            // Update horizontal scroll position
-            container.scrollLeft = newScrollLeft;
-            
-            // Force update the reveal effect with very explicit settings
+            // Update the image reveal
             if (imageContainerRef.current) {
-                const percentage = Math.min(100, (newScrollLeft / (scrollDistance * 0.9)) * 100);
-                imageContainerRef.current.style.clipPath = `inset(0 ${Math.max(0, 100 - percentage)}% 0 0)`;
-                
-                // Force a re-render by incrementing state to ensure the DOM updates
-                setForceRender(prev => prev + 1);
+                const revealPercentage = Math.min(100, (targetScrollLeft / (scrollDistance * 0.9)) * 100);
+                imageContainerRef.current.style.clipPath = `inset(0 ${Math.max(0, 100 - revealPercentage)}% 0 0)`;
             }
             
-            // If we've reached the end of horizontal scroll, set end state
-            if (newScrollLeft >= scrollDistance * 0.9) {
-                // Ensure we get a full reveal
-                updateReveal(scrollDistance * 1.5); // Overestimate to ensure 100% reveal
-                
-                // Force clip path directly for immediate full reveal
-                if (imageContainerRef.current) {
-                    imageContainerRef.current.style.clipPath = `inset(0 0% 0 0)`;
-                }
-                
-                setIsAtEnd(true);
-                isTouching = false;
-            }
-        };
-        
-        // Touch end handler
-        const handleTouchEnd = () => {
-            if (!isTouching) return;
-            
-            // If we were close to the end, ensure full reveal
-            if (container.scrollLeft >= scrollDistance * 0.8 && !isAtEnd) {
-                // Force full color reveal
+            // Check if we're near the end
+            if (scrollProgress >= 0.9 && !isAtEnd) {
+                // Force full image reveal
                 if (imageContainerRef.current) {
                     imageContainerRef.current.style.clipPath = `inset(0 0% 0 0)`;
                 }
                 setIsAtEnd(true);
-            }
-            
-            isTouching = false;
-        };
-        
-        // Add touch event listeners
-        section.addEventListener('touchstart', handleTouchStart, { passive: false });
-        section.addEventListener('touchmove', handleTouchMove, { passive: false });
-        section.addEventListener('touchend', handleTouchEnd, { passive: true });
-        
-        // Document-level touch blocker (only during horizontal scrolling)
-        const blockDocumentScroll = (e) => {
-            // Only block during active touch in the horizontal scroll section
-            if (isTouching && !isAtEnd) {
-                e.preventDefault();
+                
+                // Unpin the section
+                section.style.position = 'relative';
+                section.style.top = 'auto';
+                
+                // Apply section separation
+                applySectionSeparation();
             }
         };
         
-        // Apply document-level touch blocking
-        document.addEventListener('touchmove', blockDocumentScroll, { passive: false });
+        // Add scroll event listener
+        window.addEventListener('scroll', handleScroll, { passive: true });
         
         return () => {
-            section.removeEventListener('touchstart', handleTouchStart);
-            section.removeEventListener('touchmove', handleTouchMove);
-            section.removeEventListener('touchend', handleTouchEnd);
-            document.removeEventListener('touchmove', blockDocumentScroll);
+            window.removeEventListener('scroll', handleScroll);
+            
+            if (section) {
+                section.style.position = 'relative';
+                section.style.top = 'auto';
+            }
         };
-    }, [isMobile, isAtEnd, scrollDistance, forceRender]);
+    }, [isMobile, isAtEnd, scrollDistance, sectionTop, sectionHeight]);
 
-    // Add wheel event handler to convert vertical scroll to horizontal
+    // Add wheel event handler to convert vertical scroll to horizontal (DESKTOP ONLY)
     useEffect(() => {
-        if (isMobile) return; // Only for desktop
+        if (isMobile) return; // Skip for mobile devices - they use normal scrolling
         
         const section = sectionRef.current;
         const container = containerRef.current;
@@ -398,14 +355,14 @@ const HorizontalScroll = () => {
                     WebkitOverflowScrolling: 'touch',
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
-                    touchAction: isMobile ? 'none' : 'auto', // Disable browser touch actions on mobile
+                    touchAction: 'auto', // Enable default touch actions for mobile scrolling
                 }}
                 className="hide-scrollbar"
             >
                 <div style={{ 
                     position: 'relative', 
                     width: '200vw', 
-                    height: '90%',
+                    height: '100%',
                     display: 'flex',
                     alignItems: 'center',
                 }}>
