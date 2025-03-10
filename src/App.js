@@ -6,6 +6,7 @@ import BySex from './components/BySex';
 import ByMunicipality from './components/ByMunicipality';
 import Parliament from './components/Parliament';
 import ChartHead from './components/ChartHead';
+import PoliticalDynasty from './components/PoliticalDynasty';
 
 function App() {
   return (
@@ -104,7 +105,7 @@ function App() {
       }}>
 
         <div className='BodyText'>
-          <p>Political dynasties are a fixture of Philippine politics even if the Constitution prohibits it. Part of the problem is the Supreme Court had consistently ruled that the charter provision is not enforceable without an enabling law. Bills filed to define and enforce the ban against political dynasties have languished in Congress for decades.</p>
+          <p>Political dynasties are a fixture of Philippine politics even if the Constitution prohibits it. Part of the problem is the Supreme Court had consistently ruled that the charter provision is not enforceable without an enabling law. Bills to define and enforce the ban against political dynasties have languished in Congress for decades, and under the current congress, fewer bills had been filed to that effect.</p>
         </div>
 
         <div className='BodyText'>
@@ -118,9 +119,13 @@ function App() {
       </section>
 
 
-<ChartHead ChartHeader="Bills that prohibit political dynasties in government left stuck in Congress" ChartSubhead="Numerous measures to ban political dynasties have been filed and refiled at the House of Representatives through the years. None have gone beyond the first approval. " />
+<ChartHead ChartHeader="The number of anti-political dynasty bills in Congress has declined" ChartSubhead="Numerous measures to ban political dynasties have been filed and refiled at the House of Representatives through the years. None have gone beyond the first approval. " />
 
-      <BySex />
+      <PoliticalDynasty />
+
+      <div id='CaptionContainer'>
+          <p>Note: Data includes individual bills filed against political dynasties. Bills that were substituted from the original or combined as one are counted separately.<br></br>Source: House of Representatives </p>
+      </div>
 
       <section style={{
         position: 'relative',
