@@ -11,7 +11,7 @@ import PoliticalDynasty from './components/PoliticalDynasty';
 function App() {
   return (
     <div>
-      <Headline title="Does age matter in Philippine elections?" dek="Over half of the candidates for Philippines' House of Representatives are over 55 years old, the median age. Analysts say it's a reflection of the grip political dynasties in politics." />
+      <Headline title="Does age matter in Philippine elections?" dek="Over half of the candidates for Philippines' House of Representatives are over 55 years old, the median age. Analysts say it's a reflection of the grip political dynasties have in politics." />
 
 
       <section style={{ height: '100vh' }}>
