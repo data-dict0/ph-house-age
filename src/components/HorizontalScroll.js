@@ -73,7 +73,7 @@ const HorizontalScroll = () => {
             nextSection.style.zIndex = '1'; // Lower than our section
             
             // 2. Add significant spacing between sections (350px)
-            nextSection.style.marginTop = '350px';
+            nextSection.style.marginTop = isMobile ? '450px' : '350px'; // More spacing on mobile
             
             // 3. Set visibility based on scroll completion
             nextSection.style.visibility = isAtEnd ? 'visible' : 'hidden';
@@ -83,13 +83,15 @@ const HorizontalScroll = () => {
             if (!isAtEnd) {
                 // When scrolling horizontally, next section is completely hidden
                 nextSection.style.position = 'absolute';
-                nextSection.style.top = '1000vh'; // Push far below viewport
+                nextSection.style.top = '2000vh'; // Push far below viewport - increased for mobile
                 nextSection.style.opacity = '0'; // Ensure it's invisible
+                nextSection.style.overflow = 'hidden'; // Added to prevent content from showing
             } else {
                 // Reset position when horizontal scroll is complete
                 nextSection.style.position = 'relative';
                 nextSection.style.top = 'auto';
                 nextSection.style.opacity = '1';
+                nextSection.style.overflow = 'visible';
             }
             
             // 5. Apply styles to parent container if needed
@@ -97,6 +99,11 @@ const HorizontalScroll = () => {
             if (parentElement) {
                 parentElement.style.position = 'relative';
                 parentElement.style.overflow = 'hidden';
+                
+                // On mobile, ensure parent elements have enough height
+                if (isMobile) {
+                    parentElement.style.minHeight = '100vh';
+                }
             }
             
             // 6. Apply styles to all following siblings to ensure they're hidden during scroll
@@ -104,17 +111,35 @@ const HorizontalScroll = () => {
             while (sibling) {
                 if (!isAtEnd) {
                     sibling.style.position = 'absolute';
-                    sibling.style.top = '2000vh'; // Push even further below
+                    sibling.style.top = '3000vh'; // Push even further below for mobile
                     sibling.style.visibility = 'hidden';
                     sibling.style.opacity = '0';
+                    sibling.style.pointerEvents = 'none';
                 } else {
                     sibling.style.position = 'relative';
                     sibling.style.top = 'auto';
                     sibling.style.visibility = 'visible';
                     sibling.style.opacity = '1';
+                    sibling.style.pointerEvents = 'auto';
                 }
                 sibling = sibling.nextElementSibling;
             }
+            
+            // Add special handling for any fixed positioned elements that might interfere
+            const fixedElements = document.querySelectorAll('header, footer, nav, [style*="position: fixed"]');
+            fixedElements.forEach(el => {
+                if (el !== thisSection && !thisSection.contains(el)) {
+                    if (!isAtEnd) {
+                        el.setAttribute('data-original-z-index', el.style.zIndex || 'auto');
+                        el.style.zIndex = '5'; // Lower than our section
+                    } else {
+                        const originalZIndex = el.getAttribute('data-original-z-index');
+                        if (originalZIndex) {
+                            el.style.zIndex = originalZIndex;
+                        }
+                    }
+                }
+            });
         }
     };
 
@@ -125,7 +150,9 @@ const HorizontalScroll = () => {
         
         // Cleanup
         return () => {
-            const nextSection = sectionRef.current?.nextElementSibling;
+            const thisSection = sectionRef.current;
+            const nextSection = thisSection?.nextElementSibling;
+            
             if (nextSection) {
                 nextSection.style.visibility = 'visible';
                 nextSection.style.pointerEvents = 'auto';
@@ -133,9 +160,32 @@ const HorizontalScroll = () => {
                 nextSection.style.top = 'auto';
                 nextSection.style.marginTop = '0';
                 nextSection.style.zIndex = 'auto';
+                nextSection.style.opacity = '1';
+                nextSection.style.overflow = 'visible';
+                
+                // Also reset any following siblings
+                let sibling = nextSection.nextElementSibling;
+                while (sibling) {
+                    sibling.style.position = 'relative';
+                    sibling.style.top = 'auto';
+                    sibling.style.visibility = 'visible';
+                    sibling.style.opacity = '1';
+                    sibling.style.pointerEvents = 'auto';
+                    sibling = sibling.nextElementSibling;
+                }
+                
+                // Reset any fixed elements
+                const fixedElements = document.querySelectorAll('[data-original-z-index]');
+                fixedElements.forEach(el => {
+                    const originalZIndex = el.getAttribute('data-original-z-index');
+                    if (originalZIndex) {
+                        el.style.zIndex = originalZIndex;
+                        el.removeAttribute('data-original-z-index');
+                    }
+                });
             }
         };
-    }, [isAtEnd]);
+    }, [isAtEnd, isMobile]);
 
     // Main scroll handler - pin section and hijack scrolling
     useEffect(() => {
@@ -173,7 +223,7 @@ const HorizontalScroll = () => {
             }
             
             // If we're at the end of horizontal scroll and below the section, do nothing
-            if (isAtEnd && window.scrollY > sectionTop + sectionHeight + 350) { // Added buffer zone
+            if (isAtEnd && window.scrollY > sectionTop + sectionHeight + (isMobile ? 450 : 350)) { 
                 return;
             }
             
@@ -185,6 +235,11 @@ const HorizontalScroll = () => {
                 section.style.left = '0';
                 section.style.width = '100%';
                 section.style.zIndex = '10'; // Higher than other content
+                
+                // Force the section separation to ensure no content overflow
+                if (isMobile) {
+                    applySectionSeparation();
+                }
                 
                 // Calculate what percentage of section height we've scrolled
                 const scrollProgress = Math.min(1, (window.scrollY - sectionTop) / sectionHeight);
@@ -320,6 +375,11 @@ const HorizontalScroll = () => {
             const currentY = e.touches[0].clientY;
             const deltaY = touchLastY - currentY;
             
+            // For mobile, always force a barrier between sections during horizontal scroll
+            if (!isAtEnd) {
+                applySectionSeparation();
+            }
+            
             // Prevent default only within the horizontal scroll section
             // This helps prevent the vertical content from scrolling prematurely
             if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
@@ -378,7 +438,7 @@ const HorizontalScroll = () => {
         
         // Add touch event listeners
         section.addEventListener('touchstart', handleTouchStart, { passive: true });
-        section.addEventListener('touchmove', handleTouchMove, { passive: true });
+        section.addEventListener('touchmove', handleTouchMove, { passive: false }); // non-passive to allow preventDefault
         section.addEventListener('touchend', handleTouchEnd, { passive: true });
         
         return () => {
@@ -441,12 +501,14 @@ const HorizontalScroll = () => {
                 style={{
                     width: '100%',
                     height: '85%', // Reduced height to leave room for buffer
-                    marginTop: '25px',
+                    marginTop: '20px',
                     overflowX: 'scroll',
                     overflowY: 'hidden',
                     WebkitOverflowScrolling: 'touch',
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
+                    position: 'relative', // Ensure proper stacking
+                    zIndex: '2'  // Above the content below
                 }}
                 className="hide-scrollbar"
             >
@@ -537,6 +599,20 @@ const HorizontalScroll = () => {
                     )}
                 </div>
             </div>
+            
+            {/* Mobile-specific barrier to prevent content overlap - this is crucial */}
+            {isMobile && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: -400, // Position well below the current section
+                    left: 0,
+                    width: '100%',
+                    height: '400px', // Tall barrier
+                    background: 'transparent',
+                    zIndex: isAtEnd ? -1 : 5, // Higher z-index when scrolling
+                    visibility: isAtEnd ? 'hidden' : 'visible'
+                }}></div>
+            )}
             
             {/* Large buffer element to ensure spacing after the horizontal scroll content */}
             <div style={{
