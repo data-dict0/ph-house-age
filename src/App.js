@@ -61,7 +61,7 @@ function App() {
       }}>
 
         <div className='BodyText'>
-          <p>Broken down however, some discrepancies across locations can be seen. For instance, Mindanao tends to have slightly younger candidates for representatives than most of the archipelago, at 51.7 years old. However, part of why this is the case, is many candidates running unopposed, helping pull down the median age.</p>
+          <p>Broken down however, some discrepancies across locations can be seen. For instance, Mindanao tends to have slightly younger candidates for representatives than most of the archipelago, at 51.7 years old. However, part of why this is the case, is many candidates run unopposed, helping pull down the median age.</p>
         </div>
 
         <div className='BodyText'>
@@ -69,7 +69,7 @@ function App() {
         </div>
 
         <div className='BodyText'>
-          <p>In cases when the field is more competitive however, the question becomes who the competition is. Yusingco said a candidate's age alone barely have any bearing on its own, especially when candidates from various ages come from the same political family.</p>
+          <p>In cases when the field is more competitive however, the question becomes who the competition is. Yusingco said a candidate's age alone barely has any bearing on its own, especially when candidates from various ages come from the same political family.</p>
         </div>
 
         <div className='BodyText'>
@@ -137,7 +137,7 @@ function App() {
       }}>
 
         <div className='BodyText'>
-          <p>These familial relationships, in turn, dilute what anecdotally is a more liberal sway that younger politicians may have on policymaking, Anthony Lawrence Borja, a political scientist at De La Salle University. Bills meant to expand reproductive health, prohibit gender discrimination and institutionalize marriage equality have all struggled to gain traction in Congress.</p>
+          <p>These familial relationships, in turn, dilute what anecdotally is a more liberal sway that younger politicians may have on policymaking, said Anthony Lawrence Borja, a political scientist at De La Salle University. Bills meant to expand reproductive health, prohibit gender discrimination and institutionalize marriage equality have all struggled to gain traction in Congress.</p>
         </div>
 
         <div className='BodyText'>
